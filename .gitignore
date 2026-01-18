@@ -1,0 +1,46 @@
+# =========================
+# Root .gitignore for MERN
+# =========================
+
+# Node.js dependencies
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+client/build/
+server/dist/
+
+# Environment variables
+client/.env
+server/.env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+coverage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+
+# Optional: TypeScript build info
+*.tsbuildinfo
+
+# Optional: Next.js (if used in client)
+.next/
+out/
