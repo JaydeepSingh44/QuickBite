@@ -17,35 +17,35 @@ function ForgotPassword() {
     
     
     const handleSendOtp=async() =>{
-      setLoading(true);
+      
         try{
             const result = await axios.post(`${serverUrl}/api/auth/send-otp`,{email},
                 {withCredentials:true})
                 console.log(result);
                 setErr("");
                 setStep(2);
-                setLoading(false);
+                
 
         }catch(error){
             setErr(error?.response?.data?.message);
-            setLoading(false);
+            
 
         }
     }
 
     const handleVerifyOtp=async() =>{
-      setLoading(true);
+      
         try{
             const result = await axios.post(`${serverUrl}/api/auth/verify-otp`,{email,otp},
                 {withCredentials:true})
                 console.log(result);
                 setErr("")
                 setStep(3);
-                setLoading(false);
+              
 
         }catch(error){
             setErr(error?.response?.data?.message);
-            setLoading(false);
+            
 
         }
     }
@@ -54,18 +54,18 @@ function ForgotPassword() {
         if(newPassword!=confirmPassword){
             return null;
         }
-        setLoading(true);
+        
         try{
             const result = await axios.post(`${serverUrl}/api/auth/reset-password`,{email,newPassword},
                 {withCredentials:true})
                 setErr("")
                 console.log(result);
                 navigate("/signin");
-                setLoading(false);
+                
 
         }catch(error){
             setErr(error?.response?.data?.message);
-            setLoading(false);
+            
 
         }
     }
