@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import UserDashboard from '../components/userDashboard'
 import OwnerDashboard from '../components/ownerDashboard'
 import DeliveryBoy from '../components/DeliveryBoy'
-import Nav from "../components/Nav"
+
 
 function Home() {
     const {userData}=useSelector(state=>state.user)
@@ -12,7 +12,7 @@ function Home() {
         {userData.role =="user" && <UserDashboard/>}
         {userData.role == "owner" && <OwnerDashboard/>}
         {userData.role =="deliveryBoy" && <DeliveryBoy/>}
-        <Nav/>
+        
         
     </div>
   )
