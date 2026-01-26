@@ -33,7 +33,13 @@ export const createEditShop = async(req , res)=>{
 
 export const getMyShop = async(req,res) =>{
     try {
-        const shop = await Shop.findOne({owner:req.userId}).populate("owner items")
+       const shop = await Shop.findOne({ owner: req.userId })
+  .populate({
+    path: "items",
+    options: { sort: { updatedAt: -1 } }, 
+  })
+  .populate("owner");
+
         if (!shop) {
         return res.status(200).json({ shop: null });
         }

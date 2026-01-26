@@ -23,6 +23,7 @@ const itemSchema = new mongoose.Schema({
             "Sandwiches",
             "South Indian",
             "Chinese",
+            "Rajasthani",
             "Fast Food",
             "Others"
           ],
@@ -35,10 +36,10 @@ const itemSchema = new mongoose.Schema({
     },
     foodType:{
         type:String,
-        enum:["veg","non veg"],
+        enum:["veg","non-veg"],
         required:true,
     },
-})
+},{timestamps:true})
 
 const Item = mongoose.model("Item",itemSchema)
 export default Item

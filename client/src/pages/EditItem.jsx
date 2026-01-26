@@ -63,7 +63,7 @@ function EditItem() {
             const result= await axios.post(`${serverUrl}/api/item/edit-item/${itemId}`,formData,
                 {withCredentials:true})
             dispatch(setMyShopData(result.data))
-            console.log(result.data)
+            
             navigate("/")
         } catch (error) {
             console.log(error)

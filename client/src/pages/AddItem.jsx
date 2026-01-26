@@ -27,6 +27,7 @@ function AddItem() {
             "Sandwiches",
             "South Indian",
             "Chinese",
+            "Rajasthani",
             "Fast Food",
             "Others"
           ]
@@ -58,7 +59,7 @@ function AddItem() {
                 {withCredentials:true})
             dispatch(setMyShopData(result.data))
             navigate("/")
-            console.log(result.data)
+            
         } catch (error) {
             console.log(error)
         }
