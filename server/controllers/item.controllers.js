@@ -5,10 +5,17 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 export const addItem = async (req ,res)=>{
     try {
         const {name, category ,foodType, price} = req.body
-        let image;
-        if(req.file){
-            image= await uploadOnCloudinary(req.file.path)
-        }
+        
+       
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    const image = await uploadOnCloudinary(req.file.path);
+
+    if (!image) {
+      return res.status(500).json({ message: "Image upload failed" });
+    }
         const shop = await Shop.findOne({owner:req.userId})
         if(!shop){
             return res.status(400).json({message:` shop not found ${error}`})

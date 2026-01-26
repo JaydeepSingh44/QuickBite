@@ -44,6 +44,7 @@ function CreateEditShop() {
                 {withCredentials:true})
             dispatch(setMyShopData(result.data))
             console.log(result.data)
+            navigate("/")
         } catch (error) {
             console.log(error)
         }

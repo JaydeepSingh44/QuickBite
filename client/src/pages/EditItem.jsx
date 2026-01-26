@@ -32,6 +32,7 @@ function EditItem() {
             "Sandwiches",
             "South Indian",
             "Chinese",
+            "Rajasthan",
             "Fast Food",
             "Others"
           ]
@@ -63,6 +64,7 @@ function EditItem() {
                 {withCredentials:true})
             dispatch(setMyShopData(result.data))
             console.log(result.data)
+            navigate("/")
         } catch (error) {
             console.log(error)
         }
