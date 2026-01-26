@@ -16,8 +16,15 @@ function useGetMyShop() {
         `${serverUrl}/api/shop/get-my`,
         { withCredentials: true }
       );
-
-      dispatch(setMyShopData(result.data));
+const shop = result.data;
+      if (!shop || !shop._id) {
+        dispatch(setMyShopData(null));
+         } else {
+          dispatch(setMyShopData({
+            ...shop,
+          items: shop.items || []
+           }));
+          }
     } catch (error) {
       console.log("❌ Fetch shop error:", error);
       dispatch(setMyShopData(null));
