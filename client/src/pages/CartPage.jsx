@@ -11,10 +11,7 @@ function CartPage() {
     <div className="min-h-screen bg-[#fff9f6] flex justify-center p-6">
       <div className="w-full max-w-[800px]">
         <div className="flex items-center gap-[20px] mb-6">
-          <div
-            className=" z-[10] "
-            onClick={() => navigate("/")}
-          >
+          <div className=" z-[10] " onClick={() => navigate("/")}>
             <IoIosArrowRoundBack size={35} className="text-[#ff4d2d]" />
           </div>
           <h1 className='test-2xl font-bold text-start'>Your Cart</h1>
@@ -34,7 +31,8 @@ function CartPage() {
                   </div>
                   <div className='mt-4 flex justify-end'>
                     <button className='bg-[#ff4d2d] text-white px-6 py-3 rounded-lg text-lg 
-                    font-medium hover:bg-[#e64526] transition cursor-pointer'>Proceed to CheckOut</button>
+                    font-medium hover:bg-[#e64526] transition 
+                    cursor-pointer' onClick={()=>navigate("/checkout")}>Proceed to CheckOut</button>
                   </div>
                   </>
             )
