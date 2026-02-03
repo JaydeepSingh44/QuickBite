@@ -19,6 +19,7 @@ import { MdDeliveryDining } from "react-icons/md";
 import { FaMobileScreenButton } from "react-icons/fa6";
 import { FaCreditCard } from "react-icons/fa";
 import { serverUrl } from "../App";
+import { addMyOrder } from "../redux/userSlice";
 
 
 
@@ -105,6 +106,7 @@ const handlePlaceOrder = async()=>{
       totalAmount,
       cartItems
     },{withCredentials:true})
+    dispatch(addMyOrder(result.data))
     navigate("/order-placed")
   } catch (error) {
     console.log(error)

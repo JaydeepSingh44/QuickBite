@@ -1,7 +1,9 @@
 import React from 'react'
 import { FaCircleCheck } from "react-icons/fa6";
+import { useNavigate } from 'react-router-dom';
 
 function OrderPlaced() {
+    const navigate = useNavigate()
   return (
    <div className='min-h-screen bg-[#fff9f6] flex flex-col justify-center items-center 
    px-4 text-center relative overflow-hidden'>
@@ -11,7 +13,7 @@ function OrderPlaced() {
          You can track your order status in the "My Orders" section.
      </p>
     <button className='bg-[#ff4d2d] hover:bg-[#e64526] text-white px-6 py-3 rounded-lg 
-    text-lg font-medium transition'>Back to my orders</button>
+    text-lg font-medium transition' onClick={()=>navigate("/my-orders")}>Back to my orders</button>
 </div>
 
   )

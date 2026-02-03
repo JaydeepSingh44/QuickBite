@@ -1,6 +1,7 @@
 
 import Shop from "../models/shop.model.js"
 import Order from "../models/order.model.js"
+import User from "../models/user.model.js"
 
 
 
@@ -35,7 +36,7 @@ export const placeOrder=async(req ,res)=>{
                 owner:shop.owner._id,
                 subtotal,
                 shopOrderItems:items.map((i)=>({
-                    item:i._id,
+                    item:i.id,
                     price:i.price,
                     quantity:i.quantity,
                     name:i.name
@@ -53,9 +54,74 @@ export const placeOrder=async(req ,res)=>{
             shopOrders
 
         })
-        return res.status(201).json(newOrder)
+       await newOrder.populate("shopOrders.shopOrderItems.item","name image price")
+       await newOrder.populate("shopOrders.shop","name")
+       return res.status(201).json(newOrder)
 
     } catch (error) {
          return res.status(400).json({message:`Place Order error ${error}`})
     }
 }
+
+export const getMyOrders = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId)
+    if(user.role=="user"){
+         const orders = await Order.find({ user: req.userId })
+      .sort({ createdAt: -1 })
+      .populate("shopOrders.shop", "name")
+      .populate("shopOrders.owner", "name email mobile")
+      .populate("shopOrders.shopOrderItems.item", "name image price");
+
+       return res.status(200).json(orders);
+    }else if(user.role=="owner"){
+         const orders = await Order.find({ "shopOrders.owner": req.userId })
+      .sort({ createdAt: -1 })
+      .populate("shopOrders.shop", "name")
+      .populate("user")
+      .populate("shopOrders.shopOrderItems.item", "name image price");
+
+    const filteredOrders = orders.map((order => ({
+    _id: order._id,
+    paymentMethod: order.paymentMethod,
+    user: order.user,
+    shopOrders: order.shopOrders.find(o => o.owner._id == req.userId),
+    createdAt: order.createdAt,  
+    deliveryAddress: order.deliveryAddress
+})));
+
+       return res.status(200).json(filteredOrders);
+    }
+
+   
+  } catch (error) {
+    return res.status(500).json({ message: `Get User order error ${error}` });
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId, shopId } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findById(orderId);
+    
+
+    const shopOrder = order.shopOrders.find(o=>o.shop==shopId);
+
+    if (!shopOrder) {
+      return res.status(400).json({ message: "shop order not found" });
+    }
+
+    shopOrder.status = status;
+    await shopOrder.save()
+    await order.save()
+
+    return res.status(200).json(shopOrder);
+  } catch (error) {
+    return res.status(500).json({ message: `order status error ${error}` });
+  }
+};
+
+
+
