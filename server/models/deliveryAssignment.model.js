@@ -12,7 +12,7 @@ const deliveryAssignmentSchema = new mongoose.Schema({
         },
         shopOrderId:{
             type: mongoose.Schema.Types.ObjectId,
-             require:true
+             required:true
         },
         brodcastedTo:[
             {
@@ -26,8 +26,8 @@ const deliveryAssignmentSchema = new mongoose.Schema({
             default:null
         },
         status:{
-            type:"String",
-            enum:["brodcasted","assigned","completed"],
+            type:String,
+            enum:["brodcasted","assigned","completed", "cancelled"],
             default:"brodcasted"
         },
         acceptedAt:Date
