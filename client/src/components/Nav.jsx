@@ -6,10 +6,11 @@ import { FiShoppingCart } from "react-icons/fi";
 import { useDispatch, useSelector } from 'react-redux';
 import { RxCross2 } from "react-icons/rx";
 import { serverUrl } from '../App';
-import { setUserData } from '../redux/userSlice';
+import { setSearchItems, setUserData } from '../redux/userSlice';
 import { FaPlus } from "react-icons/fa";
 import { TbReceipt2 } from "react-icons/tb";
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 function Nav() {
     const {userData, currentCity, cartItems } = useSelector(state=>state.user)
@@ -18,6 +19,7 @@ function Nav() {
     const [showInfo,setShowInfo] = useState(false)
     const [showSearch , setShowSearch] = useState(false);
     const dispatch=useDispatch()
+    const[query,setQuery]=useState("")
     const navigate = useNavigate()
     const handleLogOut = async () =>{
       try {
@@ -27,6 +29,29 @@ function Nav() {
         console.log(error)
       }
     }
+
+    const handleSearchItems = async (query) => {
+  try {
+    const result = await axios.get(
+      `${serverUrl}/api/item/search-items?query=${query}&city=${currentCity}`,
+      { withCredentials: true }
+    )
+    dispatch(setSearchItems(result.data))
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+
+useEffect(()=>{
+  if(query){
+    handleSearchItems(query)
+  }else{
+    dispatch(setSearchItems(null))
+  }
+  
+},[query])
 
 
 
@@ -44,7 +69,8 @@ function Nav() {
 
         <div className="w-[80%] flex items-center gap-[10px]">
           <IoIosSearch size={25} className="text-[#ff4d2d]"  onClick={()=>setShowSearch(true)} />
-          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" />
+          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" 
+           onChange={(e)=>setQuery(e.target.value)} value={query}/>
         </div>
     
       </div>}
@@ -64,7 +90,8 @@ function Nav() {
 
         <div className="w-[80%] flex items-center gap-[10px]">
           <IoIosSearch size={25} className="text-[#ff4d2d]"   />
-          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" />
+          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" 
+          onChange={(e)=>setQuery(e.target.value)} value={query}/>
         </div>
     
       </div> }
@@ -111,12 +138,14 @@ function Nav() {
   
       </> :(
            <>
-           {/*---------------------------- SHOW CARt-icon only in User Dashboard -----------------------------------------  */}    
-       <div className='relative cursor-pointer' onClick={()=>navigate("/cart")} > 
+            {/*---------------------------- SHOW CARt-icon only in User Dashboard -----------------------------------------  */}
+           {userData.role=="user" && <div className='relative cursor-pointer' onClick={()=>navigate("/cart")} > 
          <FiShoppingCart size={25} className='text-[#ff4d2d] ' />
          <span className='absolute right-[-9px] top-[-12px] text-[#ff4d2d]' 
         >{cartItems.length }</span>
-       </div>
+       </div>}
+              
+       
 
 
 
@@ -140,8 +169,8 @@ function Nav() {
        </div>
 
         {showInfo && 
-      <div className ='fixed top-[80px] right-[10px] md:right-[19%] 1g:right-[25%] w-[180px] bg-white
-          shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]'>
+      <div className ={`fixed top-[80px] right-[10px] ${userData.role=="deliveryBoy"?"md:right-[20%] 1g:right-[40%]":"md:right-[19%] 1g:right-[25%]" } w-[180px] bg-white
+          shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]`}>
           <div className='text-[17px] font-semibold '>{userData.fullName}</div>
           {userData.role=="user"&& (
               <div className='md:hidden text-[#ff4d2d] font-semibold cursor-pointer'

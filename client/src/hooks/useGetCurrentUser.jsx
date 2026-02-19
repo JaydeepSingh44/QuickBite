@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useEffect } from 'react'
 import { serverUrl } from '../App'
 import { useDispatch } from 'react-redux'
-import { setUserData } from '../redux/userSlice.js';
+import { setUserData,setAuthLoading } from '../redux/userSlice.js';
 
 
 function useGetCurrentUser() {
@@ -13,6 +13,7 @@ function useGetCurrentUser() {
             const result = await axios.get(`${serverUrl}/api/user/current`,
             {withCredentials:true})
             dispatch(setUserData(result.data))
+            dispatch(setAuthLoading(false))
             
         } catch (error) {
             console.log(error)

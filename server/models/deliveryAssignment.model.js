@@ -32,7 +32,7 @@ const deliveryAssignmentSchema = new mongoose.Schema({
         },
         acceptedAt:Date
 
-},{timeseries:true})
+},{timestamps:true})
 
 const DeliveryAssignment = mongoose.model("DeliveryAssignment",deliveryAssignmentSchema)
 export default DeliveryAssignment

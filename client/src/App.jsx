@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import {Routes, Route, Navigate} from 'react-router-dom'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
 import ForgotPassword from './pages/ForgotPassword'
 import useGetCurrentUser from './hooks/useGetCurrentUser'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Home from './pages/Home'
 import useGetCity from './hooks/useGetCity'
 import useGetMyShop from './hooks/useGetMyShop'
@@ -20,9 +20,14 @@ import OrderPlaced from './pages/OrderPlaced'
 import MyOrders from './pages/MyOrders'
 import useGetMyOrders from './hooks/useGetMyOrders'
 import useUpdateLocation from './hooks/useUpdateLocation'
+import TrackOrderPage from './pages/TrackOrderPage'
+import Shop from './pages/Shop'
+import { socket } from "./socket"
+
 export const serverUrl = "http://localhost:8000"
 
 function App() {
+  const dispatch = useDispatch()
   useGetCurrentUser();
   useGetCity()
   useGetMyShop()
@@ -31,7 +36,22 @@ function App() {
   useGetMyOrders()
   useUpdateLocation()
   
-  const {userData}=useSelector(state=>state.user)
+   const { userData, isAuthLoading } = useSelector(state => state.user)
+
+
+
+   useEffect(() => {
+  if (!userData) return
+
+  socket.emit("identity", {
+    userId: userData._id
+  })
+
+}, [userData])
+
+
+
+  
   
   return (
     <Routes>
@@ -47,6 +67,8 @@ function App() {
       <Route path='/checkout' element={userData?<CheckOut/>:<Navigate to={"/signin"}/>}/>
       <Route path='/order-placed' element={userData?<OrderPlaced/>:<Navigate to={"/signin"}/>}/>
       <Route path='/my-orders' element={userData?<MyOrders/>:<Navigate to={"/signin"}/>}/>
+      <Route path='/track-order/:orderId' element={userData?<TrackOrderPage/>:<Navigate to={"/signin"}/>}/>
+      <Route path='/shop/:shopId' element={userData?<Shop/>:<Navigate to={"/signin"}/>}/>
 
     </Routes>
   )

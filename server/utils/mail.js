@@ -20,3 +20,17 @@ export const sendOtpMail = async(to,otp) =>{
         html:`<p>Your OTP for QuickBite password reset ${otp}.</b> Expires in 5 minutes. </p>`
       })
 }
+
+export const sendDeliveryOtpMail = async (user, otp) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Delivery OTP",
+      html: `<p>Your OTP for delivery is 
+      <b>${otp}</b>. It expires in 5 minutes.</p>`
+    });
+  } catch (error) {
+    console.log("Send Delivery OTP Mail Error:", error);
+  }
+};

@@ -6,7 +6,7 @@ import { TbCurrentLocation } from "react-icons/tb";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { useDispatch, useSelector } from "react-redux";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import L, { Handler } from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -19,7 +19,7 @@ import { MdDeliveryDining } from "react-icons/md";
 import { FaMobileScreenButton } from "react-icons/fa6";
 import { FaCreditCard } from "react-icons/fa";
 import { serverUrl } from "../App";
-import { addMyOrder } from "../redux/userSlice";
+import { addMyOrder, clearCart } from "../redux/userSlice";
 
 
 
@@ -47,7 +47,7 @@ function RecenterMap({ location }) {
 function CheckOut() {
   const navigate = useNavigate();
   const { location, address } = useSelector((state) => state.map);
-  const { cartItems, totalAmount } = useSelector((state) => state.user);
+  const { cartItems, totalAmount ,userData} = useSelector((state) => state.user);
   const [addressInput,setAddressInput]=useState("")
   const[paymentMethod,setPaymentMethod]=useState("cod")
   const defaultPosition = [22.7196, 75.8577]; // Indore (example)
@@ -66,15 +66,13 @@ const onDragEnd = (e) => {
   dispatch(setLocation({ lat, lon: lng }));
   getAddressByLatLng(lat,lng)
 };
-const getCurrentLocation=()=>{
-  navigator.geolocation.getCurrentPosition(async (position)=>{
-            const latitude=position.coords.latitude
-            const longitude=position.coords.longitude
-            dispatch(setLocation({lat:latitude,lon:longitude}))
-            getAddressByLatLng(latitude,longitude)
-          })
-          
+const getCurrentLocation = () => {
+  const latitude = userData.location.coordinates[1]
+  const longitude = userData.location.coordinates[0]
+  dispatch(setLocation({ lat: latitude, lon: longitude }))
+  getAddressByLatLng(latitude, longitude)
 }
+
 const getAddressByLatLng=async(lat,lng)=>{
   try {
     
@@ -106,12 +104,49 @@ const handlePlaceOrder = async()=>{
       totalAmount,
       cartItems
     },{withCredentials:true})
-    dispatch(addMyOrder(result.data))
-    navigate("/order-placed")
+    if(paymentMethod=="cod"){
+   dispatch(addMyOrder(result.data))
+   dispatch(clearCart())   // 🔥 add this line
+   navigate("/order-placed")
+}else{
+      const orderId=result.data.orderId
+      const razorOrder=result.data.razorOrder
+      openRazorpayWindow(orderId,razorOrder)
+      
+    }
+    
   } catch (error) {
     console.log(error)
   }
 }
+
+const openRazorpayWindow=(orderId,razorOrder)=>{
+       const options={
+        key:import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount:razorOrder.amount,
+        currency:'INR',
+        name:'QuickBite',
+        description:'Food Delivery website',
+        order_id:razorOrder.id,
+        handler:async function(response){
+          try {
+            const result  =await axios.post(`${serverUrl}/api/order/verify-payment`,{
+              razorpay_payment_id:response.razorpay_payment_id,
+              orderId
+            },{withCredentials:true})
+            dispatch(addMyOrder(result.data))
+            navigate("/order-placed")
+          } catch (error) {
+            console.log(error)
+          }
+        }
+
+       }
+  const rzp=new window.Razorpay(options)
+  rzp.open()
+
+}
+
 
 useEffect(()=>{
   setAddressInput(address);

@@ -5,6 +5,7 @@ const userSlice = createSlice({
     name:"user",
     initialState:{
         userData:null,
+        isAuthLoading:true, 
         currentCity:null,
         currentState:null,
         currentAddress:null,
@@ -12,13 +13,19 @@ const userSlice = createSlice({
         itemsInMyCity:null,
         cartItems:[],
         totalAmount:0,
-        myOrders:[]
+        myOrders:[],
+        searchItems:null,
+        
     },
     reducers:{
         setUserData:(state,action)=>{
         state.userData = action.payload
 
         },
+        setAuthLoading:(state,action)=>{
+    state.isAuthLoading = action.payload
+}
+,
         setCurrentCity:(state,action)=>{
         state.currentCity = action.payload
 
@@ -39,6 +46,7 @@ const userSlice = createSlice({
         state.itemsInMyCity = action.payload
         
     },
+        
     addToCard:(state,action)=>{
         const cartItem=action.payload
         const existingItem=state.cartItems.find(i=>i.id==cartItem.id)
@@ -71,11 +79,20 @@ const userSlice = createSlice({
         const {orderId , shopId, status}=action.payload
         const order=state.myOrders.find(o=>o._id==orderId)
         order.shopOrders.status=status
-    }
+    },
+    setSearchItems:(state,action)=>{
+        state.searchItems = action.payload
+        
+    },
+    clearCart: (state) => {
+  state.cartItems = []
+  state.totalAmount = 0
+},
+
 
 
 }})
-export const {setUserData,setCurrentCity,setCurrentState,setCurrentAddress,
+export const {setUserData,setAuthLoading,setCurrentCity,setCurrentState,setCurrentAddress,
     setShopInMyCity,setItemsInMyCity,addToCard,updateQuantity,removeCartItem ,
-  setMyOrders,addMyOrder, updateOrderStatus} = userSlice.actions
+  setMyOrders,addMyOrder, updateOrderStatus,setSearchItems,clearCart } = userSlice.actions
 export default userSlice.reducer
