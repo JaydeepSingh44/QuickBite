@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from "axios"
 import { FaLocationDot } from "react-icons/fa6";
 import { IoIosSearch } from "react-icons/io";
@@ -10,7 +10,6 @@ import { setSearchItems, setUserData } from '../redux/userSlice';
 import { FaPlus } from "react-icons/fa";
 import { TbReceipt2 } from "react-icons/tb";
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 
 function Nav() {
     const {userData, currentCity, cartItems } = useSelector(state=>state.user)
@@ -21,6 +20,10 @@ function Nav() {
     const dispatch=useDispatch()
     const[query,setQuery]=useState("")
     const navigate = useNavigate()
+    
+    // CHANGED: Create a Ref to track the profile dropdown container
+    const profileRef = useRef(null);
+
     const handleLogOut = async () =>{
       try {
         const result= await axios.get(`${serverUrl}/api/auth/signout`,{withCredentials:true})
@@ -31,159 +34,167 @@ function Nav() {
     }
 
     const handleSearchItems = async (query) => {
-  try {
-    const result = await axios.get(
-      `${serverUrl}/api/item/search-items?query=${query}&city=${currentCity}`,
-      { withCredentials: true }
-    )
-    dispatch(setSearchItems(result.data))
-  } catch (error) {
-    console.log(error)
-  }
-}
+      try {
+        const result = await axios.get(
+          `${serverUrl}/api/item/search-items?query=${query}&city=${currentCity}`,
+          { withCredentials: true }
+        )
+        dispatch(setSearchItems(result.data))
+      } catch (error) {
+        console.log(error)
+      }
+    }
 
+    useEffect(()=>{
+      if(query){
+        handleSearchItems(query)
+      }else{
+        dispatch(setSearchItems(null))
+      }
+    },[query])
 
+    // CHANGED: Add this useEffect to handle clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // If the menu is open AND the click is NOT inside the profileRef element
+            if (showInfo && profileRef.current && !profileRef.current.contains(event.target)) {
+                setShowInfo(false);
+            }
+        };
 
-useEffect(()=>{
-  if(query){
-    handleSearchItems(query)
-  }else{
-    dispatch(setSearchItems(null))
-  }
-  
-},[query])
+        // Add event listener
+        document.addEventListener("mousedown", handleClickOutside);
 
-
+        // Clean up listener on unmount
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showInfo]); // Re-run if showInfo changes
 
   return (
-    <div className='w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6] overflow-visible'>
+    // Main Navbar - Added transition-all
+    <div className='w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#0D0D0D] border-b border-gray-800 shadow-lg shadow-black/50 overflow-visible transition-all duration-300'>
 
- 
-      {/*---------------------------- SHOW SEARCH WHEN ROLE = user -----------------------------------------  */}
-      {showSearch && userData.role=="user" &&  <div className='w-[90%] h-[70px]  bg-white shadow-xl rounded-lg items-center gap-[20px] flex fixed top-[80px] left-[5%]'>
-        
-        <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400'>
-          <FaLocationDot size={25} className='text-[#ff4d2d]' />
-          <div className='w-[80%] truncate text-gray-600'>{currentCity}</div>
+      {/* ... (Search Logic for Mobile kept same) ... */}
+      {showSearch && userData.role=="user" &&  
+        <div className='w-[90%] h-[60px] bg-[#1F1F1F] border border-gray-700 shadow-2xl rounded-full items-center gap-[15px] flex fixed top-[90px] left-[5%] z-50 px-4 transition-all duration-300 animate-slideUp origin-top'>
+          <div className='flex items-center w-[30%] overflow-hidden gap-[8px] px-[5px] border-r border-gray-600'>
+            <FaLocationDot size={20} className='text-[#FF6B00]' />
+            <div className='w-[80%] truncate text-gray-300 text-sm'>{currentCity}</div>
+          </div>
+          <div className="w-[80%] flex items-center gap-[10px]">
+            <IoIosSearch size={22} className="text-[#FF6B00]" onClick={()=>setShowSearch(true)} />
+            <input type="text" placeholder="Search..." className="bg-transparent text-white placeholder-gray-500 outline-none w-full text-sm" 
+             onChange={(e)=>setQuery(e.target.value)} value={query}/>
+          </div>
         </div>
+      }
 
-        <div className="w-[80%] flex items-center gap-[10px]">
-          <IoIosSearch size={25} className="text-[#ff4d2d]"  onClick={()=>setShowSearch(true)} />
-          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" 
-           onChange={(e)=>setQuery(e.target.value)} value={query}/>
-        </div>
-    
-      </div>}
+      <h1 className='text-3xl font-extrabold mb-1 text-[#FF6B00] tracking-wider cursor-pointer hover:text-white transition-colors duration-300'>
+        QuickBite
+      </h1>
 
-      
-      {/*----------------------------    SHOP NAME  -----------------------------------------  */}
-      <h1 className='text-3xl font-bold mb-2 text-[#ff4d2d]'>QuickBite</h1>
+      {/* ... (Desktop Search Logic kept same) ... */}
+      {userData.role == "user" &&  
+        <div className='md:w-[60%] lg:w-[40%] h-[55px] bg-[#1F1F1F] border border-gray-800 shadow-inner rounded-full items-center gap-[15px] hidden md:flex px-5 hover:border-[#FF6B00]/50 transition-all duration-300 focus-within:shadow-[0_0_10px_rgba(255,107,0,0.2)]'>
+          <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[5px] border-r border-gray-600'>
+            <FaLocationDot size={20} className='text-[#FF6B00]' />
+            <div className='w-[80%] truncate text-gray-300 font-medium'>{currentCity}</div>
+          </div>
+          <div className="w-[80%] flex items-center gap-[10px]">
+            <IoIosSearch size={24} className="text-[#FF6B00]" />
+            <input type="text" placeholder="Search delicious food..." className="bg-transparent text-white placeholder-gray-500 outline-none w-full font-light" 
+            onChange={(e)=>setQuery(e.target.value)} value={query}/>
+          </div>
+        </div> 
+      }
 
+     <div className='flex items-center gap-6'>
 
-{/*---------------------------- SHOW SHEARCH-ICON AND LOACTION-ICON FOR User Dashboard -----------------------------------------  */}
-      {userData.role == "user" &&  <div className='md:w-[60%] lg:w-[40%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] hidden md:flex'>
-        
-        <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400'>
-          <FaLocationDot size={25} className='text-[#ff4d2d]' />
-          <div className='w-[80%] truncate text-gray-600'>{currentCity}</div>
-        </div>
-
-        <div className="w-[80%] flex items-center gap-[10px]">
-          <IoIosSearch size={25} className="text-[#ff4d2d]"   />
-          <input type="text" placeholder="search delicious food..." className="px-[10px] text-gray-700 outline-0 w-full" 
-          onChange={(e)=>setQuery(e.target.value)} value={query}/>
-        </div>
-    
-      </div> }
-
-     
-
- <div className='flex items-center gap-4'>
-
-  {/*---------------------------- SHOW SHEARCH-ICON on click Toggle for mobile size -----------------------------------------  */}
-  {userData.role == "user" && (showSearch?<RxCross2 size={25} className="text-[#ff4d2d] md:hidden" onClick={()=>setShowSearch(false)}/>: 
-  <IoIosSearch size={25} className="text-[#ff4d2d] md:hidden" onClick={()=>setShowSearch(true)}/>)}
-  
-
-  {userData.role == "owner" ? <>
-  {myShopData && <>
-      <button className='hidden md:flex items-center gap-1 p-2 cursor-pointer rounded-full
-       bg-[#ff4d2d]/10 text-[#ff4d2d]' onClick={()=>navigate("/add-item")}>
-           <FaPlus size={20} />
-           <span>Add Food Items</span>
-       </button>
-        <button className='md:hidden flex items-center p-2 cursor-pointer rounded-full
-       bg-[#ff4d2d]/10 text-[#ff4d2d]' onClick={()=>navigate("/add-item")}>
-           <FaPlus size={20} />     
-       </button>
-
-    </>}
-      
-
-       <div className='hidden md:flex items-center gap-2 cursor-pointer  relative px-3 py-1 rounded-lg bg-[#ff4d2d]/10 
-       text-[#ff4d2d] font-medium' onClick={()=>navigate("/my-orders")}>
-           <TbReceipt2 size={20}/>
-           <span>My Orders</span>
-           <span className="absolute -right-2 -top-2 text-xs font-bold text-white bg-[#ff4d2d]
-            rounded-full px-[6px] py-[1px]">0</span>
-       </div>
-
-       <div className='md:hidden flex items-center gap-2 cursor-pointer  relative px-3 py-1 rounded-lg bg-[#ff4d2d]/10 
-       text-[#ff4d2d] font-medium' onClick={()=>navigate("/my-orders")}>
-           <TbReceipt2 size={25}/>
-           
-           <span className="absolute -right-2 -top-2 text-xs font-bold text-white bg-[#ff4d2d]
-            rounded-full px-[6px] py-[1px]">0</span>
-       </div>
-  
-      </> :(
-           <>
-            {/*---------------------------- SHOW CARt-icon only in User Dashboard -----------------------------------------  */}
-           {userData.role=="user" && <div className='relative cursor-pointer' onClick={()=>navigate("/cart")} > 
-         <FiShoppingCart size={25} className='text-[#ff4d2d] ' />
-         <span className='absolute right-[-9px] top-[-12px] text-[#ff4d2d]' 
-        >{cartItems.length }</span>
-       </div>}
-              
-       
-
-
-
-       
-      
-       <button className="hidden md:block px-3 py-1 rounded-1g bg-[#ff4d2d]/10 [#ff4d2d] text-sm font-medium " onClick={()=>navigate("/my-orders")}>
-         My Orders
-       </button>
-           </>
-         
+      {/* ... (Search Toggle Icons kept same) ... */}
+      {userData.role == "user" && (
+        showSearch ? 
+        <RxCross2 size={25} className="text-[#FF6B00] md:hidden cursor-pointer hover:rotate-90 transition-transform duration-300" onClick={()=>setShowSearch(false)}/> : 
+        <IoIosSearch size={25} className="text-[#FF6B00] md:hidden cursor-pointer hover:scale-110 transition-transform duration-300" onClick={()=>setShowSearch(true)}/>
       )}
+      
 
+      {userData.role == "owner" ? <>
+      {myShopData && <>
+          <button className='hidden md:flex items-center gap-2 px-4 py-2 cursor-pointer rounded-full
+           bg-[#FF6B00]/10 border border-[#FF6B00]/30 text-[#FF6B00] hover:bg-[#FF6B00] hover:text-white transition-all duration-300 active:scale-95' onClick={()=>navigate("/add-item")}>
+               <FaPlus size={16} />
+               <span className='font-medium'>Add Item</span>
+           </button>
+            <button className='md:hidden flex items-center p-2 cursor-pointer rounded-full
+           bg-[#FF6B00]/10 text-[#FF6B00] active:scale-95 transition-transform' onClick={()=>navigate("/add-item")}>
+               <FaPlus size={20} />     
+           </button>
+        </>}
+           <div className='hidden md:flex items-center gap-2 cursor-pointer relative px-4 py-2 rounded-full bg-[#1F1F1F] border border-gray-700 
+           text-gray-300 hover:text-[#FF6B00] hover:border-[#FF6B00] transition-all duration-300 active:scale-95' onClick={()=>navigate("/my-orders")}>
+               <TbReceipt2 size={20}/>
+               <span className='font-medium'>Orders</span>
+               <span className="absolute -right-1 -top-1 text-[10px] font-bold text-white bg-[#FF6B00]
+                rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#0D0D0D]">0</span>
+           </div>
 
-
-
-       
-
-       <div className='w-[35px] h-[35px] rounded-full flex items-center justify-center bg-[#ff4d2d]
-          text-white text-[18px] shadow-xl font-semibold cursor-pointer' onClick={()=>setShowInfo(prev=>!prev)}>
-        {userData?.fullName.slice(0,1)}
-       </div>
-
-        {showInfo && 
-      <div className ={`fixed top-[80px] right-[10px] ${userData.role=="deliveryBoy"?"md:right-[20%] 1g:right-[40%]":"md:right-[19%] 1g:right-[25%]" } w-[180px] bg-white
-          shadow-2xl rounded-xl p-[20px] flex flex-col gap-[10px] z-[9999]`}>
-          <div className='text-[17px] font-semibold '>{userData.fullName}</div>
-          {userData.role=="user"&& (
-              <div className='md:hidden text-[#ff4d2d] font-semibold cursor-pointer'
-              onClick={()=>navigate("/my-orders")}>My Orders</div>
+           <div className='md:hidden flex items-center gap-2 cursor-pointer relative px-2 py-2 rounded-lg
+           text-[#FF6B00] active:scale-95 transition-transform' onClick={()=>navigate("/my-orders")}>
+               <TbReceipt2 size={28}/>
+               <span className="absolute -right-1 -top-1 text-[10px] font-bold text-white bg-[#FF6B00]
+                rounded-full w-4 h-4 flex items-center justify-center">0</span>
+           </div>
+      
+          </> :(
+               <>
+               {userData.role=="user" && 
+                <div className='relative cursor-pointer group transition-transform active:scale-95' onClick={()=>navigate("/cart")} > 
+                  <FiShoppingCart size={26} className='text-gray-300 group-hover:text-[#FF6B00] transition-colors duration-300' />
+                  {cartItems.length > 0 && 
+                    <span className='absolute -right-2 -top-2 bg-[#FF6B00] text-white text-[10px] font-bold 
+                    rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#0D0D0D] animate-bounce'>
+                      {cartItems.length}
+                    </span>
+                  }
+                </div>
+               }
+                  
+               <button className="hidden md:block px-4 py-2 rounded-full bg-[#1F1F1F] text-gray-300 text-sm font-medium hover:bg-[#FF6B00] hover:text-white transition-all duration-300 active:scale-95" onClick={()=>navigate("/my-orders")}>
+                 My Orders
+               </button>
+               </>
           )}
-          
-           <div className='text-[#ff4d2d] font-semibold cursor-pointer'onClick={handleLogOut}>Log Out</div>
-      </div>}
 
+           {/* CHANGED: Wrapped Avatar and Dropdown in a div with the ref */}
+           <div ref={profileRef} className='relative'>
+                {/* User Avatar */}
+                <div className='w-[40px] h-[40px] rounded-full flex items-center justify-center bg-gradient-to-tr from-[#FF6B00] to-[#ff9e5e]
+                    text-white text-[18px] shadow-lg shadow-[#FF6B00]/20 font-bold cursor-pointer hover:scale-105 transition-transform duration-300 border-2 border-[#0D0D0D]' 
+                    onClick={()=>setShowInfo(prev=>!prev)}>
+                    {userData?.fullName.slice(0,1)}
+                </div>
 
-     
-</div>
+                {/* Dropdown Menu - Added animate-fadeIn */}
+                {showInfo && 
+                <div className ={`fixed top-[85px] right-[20px] ${userData.role=="deliveryBoy"?"md:right-[20%] lg:right-[40%]":"md:right-[15%] lg:right-[10%]" } w-[200px] bg-[#1F1F1F] border border-gray-700
+                    shadow-2xl shadow-black rounded-xl p-[15px] flex flex-col gap-[10px] z-[9999] animate-fadeIn origin-top-right`}>
+                    
+                    <div className='text-white font-semibold border-b border-gray-700 pb-2'>{userData.fullName}</div>
+                    
+                    {userData.role=="user"&& (
+                        <div className='md:hidden text-gray-400 hover:text-[#FF6B00] font-medium cursor-pointer transition-colors duration-200'
+                        onClick={()=>navigate("/my-orders")}>My Orders</div>
+                    )}
+                    
+                    <div className='text-[#FF6B00] hover:text-white font-semibold cursor-pointer transition-colors duration-200 pt-1' onClick={handleLogOut}>
+                    Log Out
+                    </div>
+                </div>}
+            </div> 
+            {/* End of Wrapped Div */}
 
+      </div>
     </div>
   )
 }

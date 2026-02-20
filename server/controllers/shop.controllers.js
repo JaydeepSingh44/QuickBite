@@ -71,5 +71,21 @@ export const getShopByCity = async (req, res) => {
 
 
 
+export const getExploreShops = async (req, res) => {
+  try {
+    const majorCities = ["Delhi", "Noida", "Bengaluru", "Pune"];
+    
+    // Case-insensitive match for any of the major cities
+    const regexCities = majorCities.map(city => new RegExp(`^${city}$`, "i"));
+
+    const shops = await Shop.find({
+      city: { $in: regexCities }
+    }).populate('items');
+
+    return res.status(200).json(shops);
+  } catch (error) {
+    return res.status(500).json({ message: `Get explore shops error ${error}` });
+  }
+};
 
  

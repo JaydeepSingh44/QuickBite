@@ -54,6 +54,7 @@ function App() {
   
   
   return (
+    
     <Routes>
       
       <Route path='/signup' element={!userData?<SignUp/>:<Navigate to={"/"}/>}/>
@@ -71,6 +72,7 @@ function App() {
       <Route path='/shop/:shopId' element={userData?<Shop/>:<Navigate to={"/signin"}/>}/>
 
     </Routes>
+     
   )
 }
 
