@@ -24,7 +24,7 @@ import TrackOrderPage from './pages/TrackOrderPage'
 import Shop from './pages/Shop'
 import { socket } from "./socket"
 
-export const serverUrl = "http://localhost:8000"
+export const serverUrl = "https://quickbite-toeo.onrender.com"
 
 function App() {
   const dispatch = useDispatch()
