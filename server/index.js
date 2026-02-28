@@ -36,6 +36,12 @@ app.use(cors({
 }))
 app.use(express.json());
 app.use(cookieParser())
+
+app.get('/api/health', (req, res) => {
+  console.log("Health Check: Server is awake!");
+  res.status(200).json({ status: 'Server is awake', timestamp: new Date() });
+});
+
 app.use("/api/auth",authRouter);
 app.use("/api/user",userRouter);
 app.use("/api/shop",shopRouter);
