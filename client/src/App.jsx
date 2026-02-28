@@ -29,6 +29,19 @@ export const serverUrl = "https://quickbite-toeo.onrender.com"
 function App() {
   const dispatch = useDispatch()
   useGetCurrentUser();
+  
+   useEffect(() => {
+    const wakeUpServer = async () => {
+      try {
+        await fetch(`${serverUrl}/api/health`);
+        console.log("Server wake-up ping sent");
+      } catch (error) {
+        console.log("Waking up server...");
+      }
+    };
+    wakeUpServer();
+  }, []);
+  
   useGetCity()
   useGetMyShop()
   useGetShopByCity()
